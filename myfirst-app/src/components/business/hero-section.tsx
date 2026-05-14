@@ -11,8 +11,7 @@ import {
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { useThemeColor } from '@/src/hooks/use-theme-color'
-import { Colors } from '@/src/theme'
-import { typography } from '@/src/theme'
+import { Colors, typography } from '@/src/theme'
 import { useColorScheme } from '@/src/hooks/use-color-scheme'
 
 const PLATFORMS = ['YouTube', 'Bilibili', 'Twitter/X']

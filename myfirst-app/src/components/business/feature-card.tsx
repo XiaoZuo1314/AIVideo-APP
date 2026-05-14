@@ -5,8 +5,7 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { useThemeColor } from '@/src/hooks/use-theme-color'
-import { typography } from '@/src/theme'
-import { Colors } from '@/src/theme'
+import { Colors, typography } from '@/src/theme'
 import { useColorScheme } from '@/src/hooks/use-color-scheme'
 
 interface FeatureCardProps {

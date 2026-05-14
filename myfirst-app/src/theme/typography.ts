@@ -44,4 +44,14 @@ export const typography = StyleSheet.create({
     fontSize: 12,
     fontWeight: '500',
   },
+  profileName: {
+    fontSize: 28,
+    fontWeight: '500',
+    lineHeight: 36,
+  },
+  statsNumber: {
+    fontSize: 28,
+    fontWeight: '700',
+    lineHeight: 36,
+  },
 })

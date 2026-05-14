@@ -4,6 +4,7 @@
  */
 
 import { ScrollView, View, StyleSheet } from 'react-native'
+import { router } from 'expo-router'
 import { useThemeColor } from '@/src/hooks/use-theme-color'
 import {
   HeaderBar,
@@ -23,7 +24,7 @@ export default function HomeScreen() {
       showsVerticalScrollIndicator={false}
     >
       <HeaderBar />
-      <HeroSection />
+      <HeroSection onParsePress={() => router.push('/result')} />
       <View style={styles.grid}>
         <RecentCard />
         <FeatureCard />

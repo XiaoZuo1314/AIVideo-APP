@@ -34,6 +34,19 @@ export const Colors = {
     tagBorder: 'rgba(193,198,215,0.3)',
 
     gradientStart: '#E8F1FF',
+
+    chatBubbleAi: '#F2F3FF',
+    chatBubbleUser: '#1777FF',
+    aiAvatar: '#006EF3',
+
+    loginBlue: '#1777FF',
+    avatarGradientEnd: '#B4C5FF',
+    profileText: '#181B23',
+    menuIconBgBlue: 'rgba(217,226,255,0.3)',
+    menuIconBgYellow: 'rgba(245,158,11,0.2)',
+    menuIconBgGray: 'rgba(193,198,215,0.3)',
+    menuChevron: '#C1C6D7',
+    socialGreen: '#07C160',
   },
   dark: {
     primary: '#4DA3FF',
@@ -65,5 +78,18 @@ export const Colors = {
     tagBorder: 'rgba(60,70,100,0.3)',
 
     gradientStart: '#1A2A3A',
+
+    chatBubbleAi: '#1A1F36',
+    chatBubbleUser: '#4DA3FF',
+    aiAvatar: '#4DA3FF',
+
+    loginBlue: '#4DA3FF',
+    avatarGradientEnd: '#2A4A7F',
+    profileText: '#ECEDEE',
+    menuIconBgBlue: 'rgba(77,163,255,0.15)',
+    menuIconBgYellow: 'rgba(251,191,36,0.15)',
+    menuIconBgGray: 'rgba(60,70,100,0.3)',
+    menuChevron: '#6B7280',
+    socialGreen: '#07C160',
   },
 } as const

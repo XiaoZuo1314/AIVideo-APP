@@ -12,9 +12,9 @@ export default function TabLayout() {
         <Label>首页</Label>
         <Icon sf="house.fill" drawable="custom_android_drawable" />
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="features">
-        <Label>功能</Label>
-        <Icon sf="star.fill" drawable="custom_android_drawable" />
+      <NativeTabs.Trigger name="my">
+        <Label>我的</Label>
+        <Icon sf="person.fill" drawable="custom_android_drawable" />
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="pricing">
         <Label>定价</Label>
