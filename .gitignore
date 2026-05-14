@@ -40,3 +40,12 @@ Thumbs.db
 
 # agents
 *.agents
+
+# Claude Code
+.claude/
+
+# Pencil design files
+*.pen
+
+# Plan docs (temporary)
+docs/feature-docs/plan-docs/

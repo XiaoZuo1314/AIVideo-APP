@@ -42,3 +42,16 @@ app-example
 # generated native folders
 /ios
 /android
+
+# Claude Code
+.claude/
+
+# Pencil design files
+*.pen
+pencil/
+
+# Local screenshots
+screenshots/
+
+# Local skills copy
+skills/
