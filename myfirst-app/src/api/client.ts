@@ -11,7 +11,7 @@ import { getToken } from '@/src/utils/token'
  * - 开发环境：从 Expo dev server URL 自动提取本机 IP，IP 变化无需手动改
  * - 生产环境：使用 EXPO_PUBLIC_API_URL 环境变量
  */
-function getBaseUrl(): string {
+export function getBaseUrl(): string {
   if (process.env.EXPO_PUBLIC_API_URL) {
     return process.env.EXPO_PUBLIC_API_URL
   }

@@ -9,6 +9,7 @@ import {
   Pressable,
   StyleSheet,
 } from 'react-native'
+import { Controller, type Control, type FieldErrors } from 'react-hook-form'
 import { Ionicons } from '@expo/vector-icons'
 import { useThemeColor } from '@/src/hooks/use-theme-color'
 import { Colors, typography } from '@/src/theme'
@@ -16,11 +17,18 @@ import { useColorScheme } from '@/src/hooks/use-color-scheme'
 
 const PLATFORMS = ['YouTube', 'Bilibili', 'Twitter/X']
 
-interface HeroSectionProps {
-  onParsePress?: () => void
+interface HeroFormValues {
+  url: string
 }
 
-export function HeroSection({ onParsePress }: HeroSectionProps) {
+interface HeroSectionProps {
+  control: Control<HeroFormValues>
+  errors?: FieldErrors<HeroFormValues>
+  onParsePress?: () => void
+  isParsing?: boolean
+}
+
+export function HeroSection({ control, errors, onParsePress, isParsing }: HeroSectionProps) {
   const scheme = useColorScheme() ?? 'light'
   const theme = Colors[scheme]
   const textColor = useThemeColor({}, 'text')
@@ -28,6 +36,7 @@ export function HeroSection({ onParsePress }: HeroSectionProps) {
   const mutedColor = useThemeColor({}, 'textMuted')
   const primaryColor = useThemeColor({}, 'primary')
   const bgColor = useThemeColor({}, 'background')
+  const errorColor = '#EF4444'
 
   return (
     <View style={styles.container}>
@@ -51,19 +60,45 @@ export function HeroSection({ onParsePress }: HeroSectionProps) {
         粘贴链接，即可获取高清无水印视频。{'\n'}支持主流平台。
       </Text>
 
-      <View style={[styles.inputRow, { backgroundColor: bgColor, borderColor: theme.border }]}>
-        <Ionicons name="link-outline" size={20} color={mutedColor} />
-        <TextInput
-          style={styles.input}
-          placeholder="粘贴视频链接在此..."
-          placeholderTextColor={mutedColor}
-        />
-        <Pressable
-          style={[styles.parseButton, { backgroundColor: primaryColor }]}
-          onPress={onParsePress}
-        >
-          <Text style={styles.parseButtonText}>解析</Text>
-        </Pressable>
+      <View style={styles.inputSection}>
+        <View style={[styles.inputRow, { backgroundColor: bgColor, borderColor: errors?.url ? errorColor : theme.border }]}>
+          <Ionicons name="link-outline" size={20} color={mutedColor} />
+          <Controller
+            control={control}
+            name="url"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                style={styles.input}
+                placeholder="粘贴视频链接在此..."
+                placeholderTextColor={mutedColor}
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                autoCapitalize="none"
+                autoCorrect={false}
+                keyboardType="url"
+                editable={!isParsing}
+              />
+            )}
+          />
+          <Pressable
+            style={[
+              styles.parseButton,
+              { backgroundColor: primaryColor, opacity: isParsing ? 0.7 : 1 },
+            ]}
+            onPress={onParsePress}
+            disabled={isParsing}
+          >
+            <Text style={styles.parseButtonText}>
+              {isParsing ? '解析中...' : '解析'}
+            </Text>
+          </Pressable>
+        </View>
+        {errors?.url ? (
+          <Text style={[styles.errorText, { color: errorColor }]}>
+            {errors.url.message}
+          </Text>
+        ) : null}
       </View>
 
       <View style={styles.tagsRow}>
@@ -115,6 +150,10 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '500',
   },
+  inputSection: {
+    width: '100%',
+    gap: 6,
+  },
   inputRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -144,6 +183,11 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 13,
     fontWeight: '600',
+  },
+  errorText: {
+    fontSize: 12,
+    fontWeight: '500',
+    paddingLeft: 4,
   },
   tagsRow: {
     flexDirection: 'row',

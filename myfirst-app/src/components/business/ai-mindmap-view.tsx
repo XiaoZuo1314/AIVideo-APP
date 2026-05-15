@@ -6,8 +6,9 @@
 
 import React, { useState, useRef, useCallback } from 'react'
 import { View, Text, ActivityIndicator, Platform, Pressable } from 'react-native'
-import { Toolbar, MOCK_MINDMAP_MARKDOWN, styles } from './ai-mindmap-shared'
+import { Toolbar, styles } from './ai-mindmap-shared'
 import { useThemeColor } from '@/src/hooks/use-theme-color'
+import { useAiSummaryStore } from '@/src/stores'
 
 // 条件加载，避免 web 平台打包 react-native-webview
 const WebView = Platform.OS !== 'web'
@@ -121,6 +122,9 @@ const NativeMindmap = React.memo(function NativeMindmap() {
   const [loadState, setLoadState] = useState<MindmapLoadState>('loading')
   const [errorMessage, setErrorMessage] = useState('')
   const webViewRef = useRef<any>(null)
+  const readyRef = useRef(false)
+
+  const mindmapMarkdown = useAiSummaryStore((s) => s.mindmapMarkdown)
 
   // Loading timeout
   React.useEffect(() => {
@@ -147,8 +151,13 @@ const NativeMindmap = React.memo(function NativeMindmap() {
       try {
         const msg: WebViewMsg = JSON.parse(event.nativeEvent.data)
         if (msg.type === 'ready') {
+          readyRef.current = true
           setLoadState('ready')
-          sendToWebView('render', MOCK_MINDMAP_MARKDOWN)
+          // WebView 就绪后，如果有数据则立即渲染
+          const md = useAiSummaryStore.getState().mindmapMarkdown
+          if (md) {
+            sendToWebView('render', md)
+          }
         } else if (msg.type === 'error') {
           setLoadState('error')
           setErrorMessage(msg.payload ?? '渲染出错')
@@ -159,6 +168,13 @@ const NativeMindmap = React.memo(function NativeMindmap() {
     },
     [sendToWebView],
   )
+
+  // mindmapMarkdown 变化时重新渲染
+  React.useEffect(() => {
+    if (readyRef.current && mindmapMarkdown) {
+      sendToWebView('render', mindmapMarkdown)
+    }
+  }, [mindmapMarkdown, sendToWebView])
 
   const handleWebViewError = useCallback(() => {
     setLoadState('error')
@@ -176,12 +192,23 @@ const NativeMindmap = React.memo(function NativeMindmap() {
   const handleRetry = useCallback(() => {
     setLoadState('loading')
     setErrorMessage('')
+    readyRef.current = false
     webViewRef.current?.reload()
   }, [])
 
   const handleZoomIn = useCallback(() => sendToWebView('zoomIn'), [sendToWebView])
   const handleZoomOut = useCallback(() => sendToWebView('zoomOut'), [sendToWebView])
   const handleReset = useCallback(() => sendToWebView('reset'), [sendToWebView])
+
+  if (!mindmapMarkdown && loadState !== 'loading') {
+    return (
+      <View style={styles.card}>
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>暂无思维导图数据</Text>
+        </View>
+      </View>
+    )
+  }
 
   return (
     <View style={styles.card}>
