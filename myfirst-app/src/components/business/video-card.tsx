@@ -3,29 +3,47 @@
  */
 
 import { View, Text, StyleSheet } from 'react-native'
+import { Image } from 'expo-image'
 import { Ionicons } from '@expo/vector-icons'
 import { useThemeColor } from '@/src/hooks/use-theme-color'
 import { typography } from '@/src/theme'
+import { getBaseUrl } from '@/src/api/client'
 
 interface VideoCardProps {
   title: string
+  thumbnail: string
   platform: string
-  views: string
-  date: string
+  uploader: string
   duration: string
+  viewCount: number
+}
+
+function formatViewCount(count: number): string {
+  if (count >= 10000) {
+    const wan = count / 10000
+    return wan >= 1000
+      ? `${(wan / 10000).toFixed(1)}亿`
+      : `${wan.toFixed(1)}万`
+  }
+  return String(count)
 }
 
 export function VideoCard({
   title,
+  thumbnail,
   platform,
-  views,
-  date,
+  uploader,
   duration,
+  viewCount,
 }: VideoCardProps) {
   const textColor = useThemeColor({}, 'text')
   const secondaryColor = useThemeColor({}, 'textSecondary')
   const bgColor = useThemeColor({}, 'background')
   const borderColor = useThemeColor({}, 'border')
+
+  const proxyUrl = thumbnail
+    ? `${getBaseUrl()}/api/proxy/thumbnail?url=${encodeURIComponent(thumbnail)}`
+    : undefined
 
   return (
     <View
@@ -35,14 +53,23 @@ export function VideoCard({
       ]}
     >
       <View style={styles.thumbnail}>
-        <View style={styles.thumbnailPlaceholder} />
+        {proxyUrl ? (
+          <Image
+            source={{ uri: proxyUrl }}
+            style={styles.thumbnailImage}
+            contentFit="cover"
+            transition={200}
+          />
+        ) : (
+          <View style={styles.thumbnailPlaceholder} />
+        )}
         <View style={styles.durationBadge}>
           <Text style={styles.durationText}>{duration}</Text>
         </View>
       </View>
 
       <View style={styles.details}>
-        <Text style={[typography.cardTitle, { color: textColor }]}>
+        <Text style={[typography.cardTitle, { color: textColor }]} numberOfLines={2}>
           {title}
         </Text>
         <View style={styles.metaRow}>
@@ -53,15 +80,15 @@ export function VideoCard({
             </Text>
           </View>
           <View style={styles.metaItem}>
-            <Ionicons name="play-outline" size={12} color={secondaryColor} />
-            <Text style={[typography.caption, { color: secondaryColor }]}>
-              {views}
+            <Ionicons name="person-outline" size={12} color={secondaryColor} />
+            <Text style={[typography.caption, { color: secondaryColor }]} numberOfLines={1}>
+              {uploader}
             </Text>
           </View>
           <View style={styles.metaItem}>
-            <Ionicons name="calendar-outline" size={12} color={secondaryColor} />
+            <Ionicons name="play-outline" size={12} color={secondaryColor} />
             <Text style={[typography.caption, { color: secondaryColor }]}>
-              {date}
+              {formatViewCount(viewCount)}
             </Text>
           </View>
         </View>
@@ -83,6 +110,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#e0e2ed',
     justifyContent: 'flex-end',
     alignItems: 'flex-end',
+  },
+  thumbnailImage: {
+    ...StyleSheet.absoluteFillObject,
   },
   thumbnailPlaceholder: {
     ...StyleSheet.absoluteFillObject,
@@ -116,5 +146,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 4,
     alignItems: 'center',
+    flexShrink: 1,
   },
 })

@@ -1,50 +1,72 @@
-# Welcome to your Expo app 👋
+# AI视频学习助手
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
-## Get started
 
-1. Install dependencies
 
-   ```bash
-   npm install
-   ```
+## 一、项目介绍
 
-2. Start the app
+这是一套以 **AI 编程实战** 为核心的项目教程，基于 React Native + FastAPI + yt-dlp + DeepSeek + Stripe，用 AI 编程的方式从 0 到 1 开发一个《AI 万能视频下载总结器》，带你亲身体验 AI Vibe Coding 的完整工作流，学会用 AI 快速做出一个能上线变现的实用工具！
 
-   ```bash
-   npx expo start
-   ```
+![首页](https://xiaowukkkk.edgeone.app/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20260515110502_46_137.jpg)[首页]([微信图片_20260515110502_46_137.jpg (828×1792)](https://xiaowukkkk.edgeone.app/微信图片_20260515110502_46_137.jpg))
 
-In the output, you'll find options to open the app in a
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+### 为什么做这个项目？
 
-## Get a fresh project
+很多人都有下载保存视频到本地的需求，比如离线观看技术教程、或者备份自己上传的作品。但很多平台要么不支持直接下载、要么限制清晰度、要么需要安装各种客户端，非常不方便。
 
-When you're ready, run:
+更进一步，如果能在下载前快速了解一个长视频的核心内容，比如看一个 2 小时的技术分享，先看到 AI 总结的大纲和要点，就能判断值不值得花时间看完整视频，大幅提升学习效率。
 
-```bash
-npm run reset-project
-```
+这就是 AI 万能视频下载总结器的起点：输入一个视频链接，工具自动解析视频信息，支持从 B 站、YouTube、抖音等 **1800+** 平台下载视频，同时提供 **AI 视频总结**（摘要 + 思维导图 + 问答）
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+**一个链接搞定视频下载 + AI 总结，学习效率翻倍！**
 
-## Learn more
+![解析下载视频并用 AI 总结](https://xiaowukkkk.edgeone.app/微信图片_20260515110103_42_137.png))
 
-To learn more about developing your project with Expo, look at the following resources:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
 
-## Join the community
+⚠️ 合规使用声明：本项目仅用于技术学习和研究目的，请用户仅下载自己拥有版权或已获得合法授权的内容（如备份自己上传的视频、下载公开授权的免版权素材等）。用户应自行遵守所在地区的法律法规及各平台的服务条款，开发者不对用户的使用行为承担任何法律责任。
 
-Join our community of developers creating universal apps.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+### 7 大核心能力
+
+1）多平台视频解析和下载：基于 yt-dlp 支持 1800+ 网站，涵盖 B 站、YouTube、抖音等主流平台，提供多种清晰度和格式供用户选择。针对抖音等特殊平台，开发了专用解析模块，无需用户提供 Cookie 即可获取无水印视频。
+
+![多平台视频解析和下载](https://xiaowukkkk.edgeone.app/微信图片_20260515110503_47_137.jpg))
+
+2）AI 视频总结摘要：自动提取字幕并调用 DeepSeek 大模型进行内容分析，流式输出视频的总结摘要，Markdown 格式排版精美，帮助用户快速了解视频核心要点。
+
+![解析下载视频并用 AI 总结](https://xiaowukkkk.edgeone.app/微信图片_20260515110103_42_137.png)
+
+3）AI 生成思维导图：基于视频内容自动生成交互式思维导图，支持全屏展示、缩放拖拽、导出高清 PNG 和 SVG 格式图片。
+
+![AI 生成思维导图](https://xiaowukkkk.edgeone.app/微信图片_20260515110137_44_137.png))
+
+4）AI 视频问答：用户可以基于视频内容进行自由问答，AI 根据字幕文本给出针对性的回答，辅助深度学习。
+
+![](https://xiaowukkkk.edgeone.app/微信图片_20260515110214_45_137.png))
+
+5）字幕导出：支持下载 SRT、VTT、TXT 等多种格式的字幕文件，方便用户自行整理和学习。
+
+![](https://xiaowukkkk.edgeone.app/微信图片_20260515110117_43_137.png))
+
+6）用户注册登录 + 会员权限
+
+支持邮箱 + 密码注册登录，基于 JWT 实现无状态认证。免费用户每天可使用 3 次 AI 总结，VIP 会员不限次数。
+
+
+
+## 二、项目优势
+
+本项目选题新颖，紧跟 AI 编程时代，以 **实用工具** 为导向
+
+
+
+## 三、更多介绍
+
+功能模块：
+
+![功能模块图](https://pic.yupi.icu/1/image-20260323163948750.png)
+
+

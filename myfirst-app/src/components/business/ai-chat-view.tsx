@@ -1,35 +1,14 @@
 /**
- * AI 问答视图 — 上下文卡片 + 聊天消息 + 输入栏
+ * AI 问答视图 — 从 Store 读取聊天消息，支持流式回答
  */
 
+import { useRef, useEffect } from 'react'
 import { View, Text, TextInput, Pressable, ScrollView, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { useThemeColor } from '@/src/hooks/use-theme-color'
 import { Colors } from '@/src/theme'
 import { useColorScheme } from '@/src/hooks/use-color-scheme'
-
-const MOCK_MESSAGES = [
-  {
-    role: 'ai' as const,
-    text: '您好！我已经分析完这段关于苹果 WWDC 2024 的视频。关于 iOS 18 的新特性、Apple Intelligence 的应用，或者其他发布内容，您想了解什么？',
-  },
-  {
-    role: 'user' as const,
-    text: '视频里有没有提到新的 Siri 具体能做什么？可以举几个例子吗？',
-  },
-  {
-    role: 'ai' as const,
-    text: '视频中详细介绍了全新 Siri 在 Apple Intelligence 加持下的升级，主要有以下几个方面：',
-  },
-  {
-    role: 'user' as const,
-    text: '屏幕感知那个功能，除了保存地址还能干嘛？',
-  },
-  {
-    role: 'streaming' as const,
-    text: '',
-  },
-]
+import { useAiSummaryStore } from '@/src/stores'
 
 export function AiChatView() {
   const scheme = useColorScheme() ?? 'light'
@@ -37,6 +16,26 @@ export function AiChatView() {
   const textColor = useThemeColor({}, 'text')
   const mutedColor = useThemeColor({}, 'textMuted')
   const primaryColor = useThemeColor({}, 'primary')
+
+  const chatMessages = useAiSummaryStore((s) => s.chatMessages)
+  const chatInput = useAiSummaryStore((s) => s.chatInput)
+  const isChatLoading = useAiSummaryStore((s) => s.isChatLoading)
+  const setChatInput = useAiSummaryStore((s) => s.setChatInput)
+  const sendQuestion = useAiSummaryStore((s) => s.sendQuestion)
+  const subtitleData = useAiSummaryStore((s) => s.subtitleData)
+
+  const scrollRef = useRef<ScrollView>(null)
+
+  // 新消息自动滚动到底部
+  useEffect(() => {
+    setTimeout(() => {
+      scrollRef.current?.scrollToEnd({ animated: true })
+    }, 100)
+  }, [chatMessages])
+
+  const contextTitle = subtitleData?.full_text
+    ? '视频内容已就绪'
+    : '等待视频分析完成'
 
   return (
     <View style={styles.container}>
@@ -48,10 +47,12 @@ export function AiChatView() {
           </View>
           <View style={styles.contextInfo}>
             <Text style={styles.contextTitle} numberOfLines={1}>
-              2024 Apple 开发者大会完整回顾
+              {contextTitle}
             </Text>
             <Text style={[styles.contextStatus, { color: mutedColor }]}>
-              AI 已就绪，您可以针对该视频内容提问
+              {subtitleData?.has_subtitle
+                ? 'AI 已就绪，您可以针对该视频内容提问'
+                : '等待字幕提取完成后即可提问'}
             </Text>
           </View>
         </View>
@@ -59,12 +60,64 @@ export function AiChatView() {
 
       {/* Chat Messages — scrollable */}
       <ScrollView
+        ref={scrollRef}
         style={styles.messagesScroll}
         contentContainerStyle={styles.messages}
         showsVerticalScrollIndicator={false}
       >
-        {MOCK_MESSAGES.map((msg, i) => {
-          if (msg.role === 'ai') {
+        {chatMessages.map((msg, i) => {
+          if (msg.role === 'assistant' && msg.loading) {
+            return (
+              <View key={i} style={styles.aiMessageRow}>
+                <View
+                  style={[
+                    styles.aiAvatar,
+                    { backgroundColor: theme.aiAvatar },
+                  ]}
+                >
+                  <Ionicons name="sparkles" size={16} color="#FFFFFF" />
+                </View>
+                <View
+                  style={[
+                    styles.aiBubble,
+                    {
+                      backgroundColor: theme.chatBubbleAi,
+                      borderColor: 'rgba(229,231,235,0.5)',
+                    },
+                  ]}
+                >
+                  {msg.content ? (
+                    <Text style={[styles.messageText, { color: textColor }]}>
+                      {msg.content}
+                    </Text>
+                  ) : (
+                    <View style={styles.streamingDots}>
+                      <View
+                        style={[
+                          styles.dot,
+                          { backgroundColor: primaryColor },
+                        ]}
+                      />
+                      <View
+                        style={[
+                          styles.dot,
+                          { backgroundColor: primaryColor },
+                        ]}
+                      />
+                      <View
+                        style={[
+                          styles.dot,
+                          { backgroundColor: primaryColor },
+                        ]}
+                      />
+                    </View>
+                  )}
+                </View>
+              </View>
+            )
+          }
+
+          if (msg.role === 'assistant') {
             return (
               <View key={i} style={styles.aiMessageRow}>
                 <View
@@ -85,62 +138,17 @@ export function AiChatView() {
                   ]}
                 >
                   <Text style={[styles.messageText, { color: textColor }]}>
-                    {msg.text}
+                    {msg.content}
                   </Text>
                 </View>
               </View>
             )
           }
 
-          if (msg.role === 'user') {
-            return (
-              <View key={i} style={styles.userMessageRow}>
-                <View style={[styles.userBubble, { backgroundColor: theme.chatBubbleUser }]}>
-                  <Text style={styles.userMessageText}>{msg.text}</Text>
-                </View>
-              </View>
-            )
-          }
-
           return (
-            <View key={i} style={styles.aiMessageRow}>
-              <View
-                style={[
-                  styles.aiAvatar,
-                  { backgroundColor: theme.aiAvatar },
-                ]}
-              >
-                <Ionicons name="sparkles" size={16} color="#FFFFFF" />
-              </View>
-              <View
-                style={[
-                  styles.aiBubble,
-                  {
-                    backgroundColor: theme.chatBubbleAi,
-                    borderColor: 'rgba(229,231,235,0.5)',
-                  },
-                ]}
-              >
-                <View style={styles.streamingDots}>
-                  <View
-                    style={[
-                      styles.dot,
-                      { backgroundColor: primaryColor },
-                    ]}
-                  />
-                  <View
-                    style={[
-                      styles.dot,
-                      { backgroundColor: primaryColor },
-                    ]}
-                  />
-                  <View
-                    style={[
-                      styles.dot,
-                      { backgroundColor: primaryColor },
-                    ]}
-                  />
-                </View>
+            <View key={i} style={styles.userMessageRow}>
+              <View style={[styles.userBubble, { backgroundColor: theme.chatBubbleUser }]}>
+                <Text style={styles.userMessageText}>{msg.content}</Text>
               </View>
             </View>
           )
@@ -159,9 +167,20 @@ export function AiChatView() {
             style={styles.input}
             placeholder="针对视频内容向 AI 提问..."
             placeholderTextColor={mutedColor}
+            value={chatInput}
+            onChangeText={setChatInput}
+            editable={!isChatLoading}
           />
           <Pressable
-            style={[styles.sendButton, { backgroundColor: primaryColor }]}
+            style={[
+              styles.sendButton,
+              {
+                backgroundColor: primaryColor,
+                opacity: !chatInput.trim() || isChatLoading ? 0.5 : 1,
+              },
+            ]}
+            onPress={sendQuestion}
+            disabled={!chatInput.trim() || isChatLoading}
           >
             <Ionicons name="arrow-up" size={16} color="#FFFFFF" />
           </Pressable>

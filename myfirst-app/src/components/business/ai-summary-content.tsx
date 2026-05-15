@@ -1,35 +1,40 @@
 /**
- * AI 摘要内容 — 核心观点 + 关键章节
+ * AI 摘要内容 — 从 Store 读取流式摘要文本
  */
 
-import { View, StyleSheet } from 'react-native'
+import { View, Text, ActivityIndicator, StyleSheet } from 'react-native'
 import Markdown from 'react-native-markdown-display'
 import { useThemeColor } from '@/src/hooks/use-theme-color'
-
-const MOCK_MARKDOWN = `
-## 核心观点
-
-本次演讲主要探讨了人工智能在未来五年的发展趋势，特别强调了生成式AI在垂直领域的深度应用。讲者认为，未来的AI不仅是通用工具，更是具备行业专长的"数字专家"。
-
-- **效率革命：** AI将使知识工作者的效率提升40%以上。
-- **人机协同：** 未来的工作模式不是AI替代人类，而是"人类+AI"共同创造更大的价值。
-
----
-
-## 关键章节
-
-### 01. 技术演进路线
-
-从大语言模型(LLM)到多模态模型(LMM)的跨越。视觉、听觉和文本的融合将打破现有的交互边界。
-
-### 02. 行业落地挑战
-
-数据隐私、模型可解释性和监管合规是AI在金融、医疗等行业落地的三大挑战。解决方案包括联邦学习和差分隐私技术。
-`
+import { useAiSummaryStore } from '@/src/stores'
 
 export function AiSummaryContent() {
   const textColor = useThemeColor({}, 'text')
   const primaryColor = useThemeColor({}, 'primary')
+  const mutedColor = useThemeColor({}, 'textMuted')
+
+  const summaryText = useAiSummaryStore((s) => s.summaryText)
+  const isSummarizing = useAiSummaryStore((s) => s.isSummarizing)
+
+  if (!summaryText && !isSummarizing) {
+    return (
+      <View style={styles.emptyCard}>
+        <Text style={[styles.emptyText, { color: mutedColor }]}>
+          暂无摘要内容
+        </Text>
+      </View>
+    )
+  }
+
+  if (!summaryText && isSummarizing) {
+    return (
+      <View style={styles.emptyCard}>
+        <ActivityIndicator size="small" color={primaryColor} />
+        <Text style={[styles.emptyText, { color: mutedColor }]}>
+          AI 正在分析视频内容...
+        </Text>
+      </View>
+    )
+  }
 
   return (
     <View style={styles.card}>
@@ -44,8 +49,16 @@ export function AiSummaryContent() {
           },
         }}
       >
-        {MOCK_MARKDOWN}
+        {summaryText}
       </Markdown>
+      {isSummarizing ? (
+        <View style={styles.generatingRow}>
+          <ActivityIndicator size="small" color={primaryColor} />
+          <Text style={[styles.generatingText, { color: mutedColor }]}>
+            AI 正在生成中...
+          </Text>
+        </View>
+      ) : null}
     </View>
   )
 }
@@ -60,6 +73,32 @@ const styles = StyleSheet.create({
     padding: 24,
     gap: 12,
     boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.06)',
+  },
+  emptyCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    borderCurve: 'continuous',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    padding: 48,
+    gap: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.06)',
+  },
+  emptyText: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  generatingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingTop: 8,
+  },
+  generatingText: {
+    fontSize: 13,
+    fontWeight: '500',
   },
 })
 

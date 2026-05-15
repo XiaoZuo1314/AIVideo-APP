@@ -1,61 +1,60 @@
 /**
- * 视频字幕视图 — 字幕列表 + 下载按钮
+ * 视频字幕视图 — 从 Store 读取字幕数据
  */
 
-import { View, Text, Pressable, StyleSheet } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { View, Text, StyleSheet } from 'react-native'
 import { useThemeColor } from '@/src/hooks/use-theme-color'
+import { useAiSummaryStore } from '@/src/stores'
 
-const MOCK_SUBTITLES = [
-  { time: '0:04', text: '不愧是首都啊' },
-  { time: '0:05', text: '兄弟们连酒店都这么有皇家特色' },
-  { time: '0:09', text: '今天的穿搭呢是都市商务风' },
-  { time: '0:22', text: '家人们' },
-  { time: '0:23', text: '我改装的第一辆车居然上北京车展了' },
-  { time: '0:26', text: '而且特别多人喜欢他' },
-  { time: '0:30', text: '朋友们想知道这个车原本是什么样的吗' },
-  { time: '0:34', text: '那我们把时间倒回几天前的素车版' },
-  { time: '0:40', text: '作为我的第一辆改装车呢' },
-  { time: '0:41', text: '我选择的就是这一台蔚来萤火虫' },
-  { time: '0:44', text: '它是一台温柔治愈的城市精品小车' },
-  { time: '0:48', text: '这次的改装呢我不打算去改它的动力' },
-]
-
-interface AiSubtitlesViewProps {
-  onDownloadPress?: () => void
+function formatTime(seconds: number): string {
+  const h = Math.floor(seconds / 3600)
+  const m = Math.floor((seconds % 3600) / 60)
+  const s = Math.floor(seconds % 60)
+  if (h > 0) {
+    return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+  }
+  return `${m}:${String(s).padStart(2, '0')}`
 }
 
-export function AiSubtitlesView({ onDownloadPress }: AiSubtitlesViewProps) {
+export function AiSubtitlesView() {
   const primaryColor = useThemeColor({}, 'primary')
+  const mutedColor = useThemeColor({}, 'textMuted')
+
+  const subtitleData = useAiSummaryStore((s) => s.subtitleData)
+  const segments = subtitleData?.segments ?? []
+
+  if (!subtitleData || !subtitleData.has_subtitle) {
+    return (
+      <View style={styles.emptyCard}>
+        <Text style={[styles.emptyText, { color: mutedColor }]}>
+          该视频暂无可用字幕
+        </Text>
+      </View>
+    )
+  }
 
   return (
     <View style={styles.container}>
       {/* Subheader */}
       <View style={styles.subheader}>
         <View style={styles.subheaderLeft}>
-          <Text style={styles.subtitleCount}>共 92 条字幕</Text>
+          <Text style={styles.subtitleCount}>共 {segments.length} 条字幕</Text>
           <View style={styles.badge}>
             <Text style={[styles.badgeText, { color: primaryColor }]}>
-              自动字幕 · ai-zh
+              {subtitleData.subtitle_type === 'auto' ? '自动字幕' : '字幕'}
+              {subtitleData.language ? ` · ${subtitleData.language}` : ''}
             </Text>
           </View>
         </View>
-        {/* <Pressable style={styles.downloadBtn} onPress={onDownloadPress}>
-          <Ionicons name="download-outline" size={12} color={primaryColor} />
-          <Text style={[styles.downloadBtnText, { color: primaryColor }]}>
-            下载字幕
-          </Text>
-          <Ionicons name="chevron-forward" size={8} color={primaryColor} />
-        </Pressable> */}
       </View>
 
       {/* Transcript List */}
       <View style={styles.list}>
-        {MOCK_SUBTITLES.map((item, i) => (
+        {segments.map((item, i) => (
           <View key={i} style={styles.transcriptItem}>
             <View style={styles.timeContainer}>
               <Text style={[styles.timeText, { color: primaryColor }]}>
-                {item.time}
+                {formatTime(item.start)}
               </Text>
             </View>
             <View style={styles.textContainer}>
@@ -71,6 +70,21 @@ export function AiSubtitlesView({ onDownloadPress }: AiSubtitlesViewProps) {
 const styles = StyleSheet.create({
   container: {
     gap: 0,
+  },
+  emptyCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    borderCurve: 'continuous',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    padding: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.06)',
+  },
+  emptyText: {
+    fontSize: 14,
+    fontWeight: '500',
   },
   subheader: {
     flexDirection: 'row',
@@ -101,15 +115,6 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     fontSize: 12,
-  },
-  downloadBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  downloadBtnText: {
-    fontSize: 14,
-    fontWeight: '500',
   },
   list: {
     backgroundColor: '#FFFFFF',

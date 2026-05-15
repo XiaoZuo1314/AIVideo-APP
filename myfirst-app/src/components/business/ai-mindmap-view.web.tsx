@@ -5,8 +5,9 @@
 
 import React, { useState, useRef, useCallback } from 'react'
 import { View, Text, ActivityIndicator, Pressable } from 'react-native'
-import { Toolbar, MOCK_MINDMAP_MARKDOWN, styles } from './ai-mindmap-shared'
+import { Toolbar, styles } from './ai-mindmap-shared'
 import { useThemeColor } from '@/src/hooks/use-theme-color'
+import { useAiSummaryStore } from '@/src/stores'
 
 interface ScriptConfig {
   src: string
@@ -55,6 +56,9 @@ export function AiMindmapView() {
   const [retryKey, setRetryKey] = useState(0)
   const containerRef = useRef<HTMLDivElement>(null)
   const mmRef = useRef<any>(null)
+  const scriptsLoadedRef = useRef(false)
+
+  const mindmapMarkdown = useAiSummaryStore((s) => s.mindmapMarkdown)
 
   // Loading timeout — reset on retry
   React.useEffect(() => {
@@ -74,20 +78,16 @@ export function AiMindmapView() {
         for (const config of MARKMAP_SCRIPTS) {
           await loadScript(config)
         }
-        if (cancelled || !containerRef.current) return
+        if (cancelled) return
 
-        const mmLib = (window as any).markmap
-        const transformer = new mmLib.Transformer()
-        const result = transformer.transform(MOCK_MINDMAP_MARKDOWN)
+        scriptsLoadedRef.current = true
+        setLoadState('ready')
 
-        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
-        svg.setAttribute('width', '100%')
-        svg.setAttribute('height', '100%')
-        containerRef.current.innerHTML = ''
-        containerRef.current.appendChild(svg)
-
-        mmRef.current = mmLib.Markmap.create(svg, {}, result.root)
-        if (!cancelled) setLoadState('ready')
+        // 脚本加载完成后如果有数据则渲染
+        const md = useAiSummaryStore.getState().mindmapMarkdown
+        if (md && containerRef.current) {
+          renderMindmap(md)
+        }
       } catch (err) {
         if (!cancelled) {
           setLoadState('error')
@@ -100,9 +100,36 @@ export function AiMindmapView() {
     return () => { cancelled = true }
   }, [retryKey])
 
+  function renderMindmap(markdown: string) {
+    if (!containerRef.current) return
+    try {
+      const mmLib = (window as any).markmap
+      const transformer = new mmLib.Transformer()
+      const result = transformer.transform(markdown)
+
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+      svg.setAttribute('width', '100%')
+      svg.setAttribute('height', '100%')
+      containerRef.current.innerHTML = ''
+      containerRef.current.appendChild(svg)
+
+      mmRef.current = mmLib.Markmap.create(svg, {}, result.root)
+    } catch {
+      // ignore render error
+    }
+  }
+
+  // mindmapMarkdown 变化时重新渲染
+  React.useEffect(() => {
+    if (scriptsLoadedRef.current && mindmapMarkdown) {
+      renderMindmap(mindmapMarkdown)
+    }
+  }, [mindmapMarkdown])
+
   const handleRetry = useCallback(() => {
     setLoadState('loading')
     setErrorMessage('')
+    scriptsLoadedRef.current = false
     MARKMAP_SCRIPTS.forEach(config => {
       const existing = document.querySelector(`script[src="${config.src}"]`)
       if (existing) existing.remove()

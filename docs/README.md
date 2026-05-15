@@ -90,6 +90,7 @@
 功能模块：
 
 ![功能模块图](https://pic.yupi.icu/1/image-20260323163948750.png)
+https://xiaowukkkk.edgeone.app/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20260515110503_47_137.jpg
 
 架构设计：
 
